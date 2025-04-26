@@ -1,4 +1,3 @@
-
 import { TreeNode } from './tree-node';
 
 export class StateTree {

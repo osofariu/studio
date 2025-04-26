@@ -41,9 +41,7 @@ export default function Home() {
   const [selectedNode, setSelectedNode] = useState<TreeNode | null>(null);
   const [newNodeName, setNewNodeName] = useState('');
   const [newChildName, setNewChildName] = useState('');
-  const [expandedNodes, setExpandedNodes] = useState<string[]>(
-    initialTreeData.map(node => node.name)
-  ); // Initialize with root node expanded
+  const [expandedNodes, setExpandedNodes] = useState<string[]>([]);
 
   const updateNodeName = () => {
     if (selectedNode && newNodeName) {
@@ -76,7 +74,7 @@ export default function Home() {
             setExpandedNodes(prevExpandedNodes => {
               const updatedExpandedNodes = new Set(prevExpandedNodes);
               updatedExpandedNodes.add(nodeToUpdate.name);
-              updatedExpandedNodes.add(newChild.name)
+              updatedExpandedNodes.add(newChild.name);
               return Array.from(updatedExpandedNodes);
             });
 
@@ -134,7 +132,7 @@ export default function Home() {
         const nodeToUpdate = newStateTree.first(node => node === selectedNode);
         if (nodeToUpdate) {
           nodeToUpdate.isEnabled = !nodeToUpdate.isEnabled;
-           return new StateTree([...newStateTree.trees]);
+          return new StateTree([...newStateTree.trees]);
         }
         return new StateTree(newStateTree.trees);
       });

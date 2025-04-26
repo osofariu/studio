@@ -134,11 +134,11 @@ export default function Home() {
         const nodeToUpdate = newStateTree.first(node => node === selectedNode);
         if (nodeToUpdate) {
           nodeToUpdate.isEnabled = !nodeToUpdate.isEnabled;
-            return new StateTree([...newStateTree.trees]);
+           return new StateTree([...newStateTree.trees]);
         }
         return new StateTree(newStateTree.trees);
       });
-       setStateTree(prevState => new StateTree([...prevState.trees]));
+      setStateTree(prevState => new StateTree([...prevState.trees]));
     }
   };
 
@@ -149,11 +149,11 @@ export default function Home() {
         const nodeToUpdate = newStateTree.first(node => node === selectedNode);
         if (nodeToUpdate) {
           nodeToUpdate.isCompleted = !nodeToUpdate.isCompleted;
-           return new StateTree([...newStateTree.trees]);
+          return new StateTree([...newStateTree.trees]);
         }
         return new StateTree(newStateTree.trees);
       });
-       setStateTree(prevState => new StateTree([...prevState.trees]));
+      setStateTree(prevState => new StateTree([...prevState.trees]));
     }
   };
 

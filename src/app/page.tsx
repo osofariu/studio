@@ -1,14 +1,27 @@
-
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { StateTree } from '@/state-tree/state-tree';
-import { TreeNodeBuilder, TreeNode } from '@/state-tree/tree-node';
-import { Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider, SidebarSeparator } from '@/components/ui/sidebar';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import React, {useState, useEffect} from 'react';
+import {StateTree} from '@/state-tree/state-tree';
+import {TreeNodeBuilder, TreeNode} from '@/state-tree/tree-node';
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarSeparator,
+  SidebarProvider,
+} from '@/components/ui/sidebar';
+import {Button} from '@/components/ui/button';
+import {Input} from '@/components/ui/input';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import {ScrollArea} from '@/components/ui/scroll-area';
 
 // Theme import
 import './globals.css';
@@ -17,33 +30,53 @@ const defaultAccentColor = 'hsl(174, 100%, 29%)';
 
 // Example Tree Data
 const initialTreeData: TreeNode[] = [
-  new TreeNodeBuilder('Root 1')
-    .addChild(new TreeNodeBuilder('Child 1.1').build())
-    .addChild(new TreeNodeBuilder('Child 1.2').setCompleted(true).build())
-    .build(),
-  new TreeNodeBuilder('Root 2')
-    .addChild(new TreeNodeBuilder('Child 2.1').setEnabled(false).build())
+  new TreeNodeBuilder('Initial Root')
+    .setEnabled(true)
+    .setCompleted(false)
     .build(),
 ];
 
 export default function Home() {
   const [stateTree, setStateTree] = useState(new StateTree(initialTreeData));
-  const [selectedNodeName, setSelectedNodeName] = useState<string | null>(null);
-  const [newRootName, setNewRootName] = useState('');
+  const [selectedNode, setSelectedNode] = useState<TreeNode | null>(null);
+  const [newNodeName, setNewNodeName] = useState('');
+  const [newChildName, setNewChildName] = useState('');
 
-  const addRootNode = () => {
-    if (newRootName) {
-      const newTree = new TreeNodeBuilder(newRootName).build();
+  const updateNodeName = () => {
+    if (selectedNode && newNodeName) {
       setStateTree(prevState => {
-        const newStateTree = new StateTree([...prevState.trees, newTree]);
+        const newStateTree = new StateTree(prevState.trees);
+        const nodeToUpdate = newStateTree.first(
+          node => node === selectedNode
+        );
+        if (nodeToUpdate) {
+          nodeToUpdate.name = newNodeName;
+        }
         return newStateTree;
       });
-      setNewRootName('');
+      setNewNodeName('');
     }
   };
 
-  const handleNodeSelection = (nodeName: string) => {
-    setSelectedNodeName(nodeName);
+  const addChildNode = () => {
+    if (selectedNode && newChildName) {
+      setStateTree(prevState => {
+        const newStateTree = new StateTree(prevState.trees);
+        const nodeToUpdate = newStateTree.first(
+          node => node === selectedNode
+        );
+        if (nodeToUpdate) {
+          const newChild = new TreeNodeBuilder(newChildName).build();
+          nodeToUpdate.children = [...nodeToUpdate.children, newChild];
+        }
+        return newStateTree;
+      });
+      setNewChildName('');
+    }
+  };
+
+  const handleNodeSelection = (node: TreeNode) => {
+    setSelectedNode(node);
   };
 
   const toggleNodeEnable = (node: TreeNode) => {
@@ -73,13 +106,20 @@ export default function Home() {
   const displayTree = (trees: TreeNode[], indent: string = '') => {
     return trees.map((node, index) => (
       <AccordionItem key={index} value={node.name}>
-        <AccordionTrigger onClick={() => handleNodeSelection(node.name)}>
+        <AccordionTrigger onClick={() => handleNodeSelection(node)}>
           {indent}
-          {node.name} ({node.isEnabled ? 'Enabled' : 'Disabled'}, {node.isCompleted ? 'Completed' : 'Incomplete'})
+          {node.name} (
+          {node.isEnabled ? 'Enabled' : 'Disabled'},{' '}
+          {node.isCompleted ? 'Completed' : 'Incomplete'}
+          )
         </AccordionTrigger>
         <AccordionContent>
-          <Button onClick={() => toggleNodeEnable(node)}>{node.isEnabled ? 'Disable' : 'Enable'} Node</Button>
-          <Button onClick={() => toggleNodeComplete(node)}>{node.isCompleted ? 'Reset' : 'Complete'} Node</Button>
+          <Button onClick={() => toggleNodeEnable(node)}>
+            {node.isEnabled ? 'Disable' : 'Enable'} Node
+          </Button>
+          <Button onClick={() => toggleNodeComplete(node)}>
+            {node.isCompleted ? 'Reset' : 'Complete'} Node
+          </Button>
           {displayTree(node.children, indent + '  ')}
         </AccordionContent>
       </AccordionItem>
@@ -108,27 +148,38 @@ export default function Home() {
         </Sidebar>
 
         <div className="flex-1 p-4 overflow-auto">
-          <h2 className="text-2xl font-semibold mb-4">Tree State Management</h2>
-          <div className="mb-4">
-            <Input
-              type="text"
-              placeholder="New Root Node Name"
-              value={newRootName}
-              onChange={e => setNewRootName(e.target.value)}
-              className="mb-2"
-            />
-            <Button onClick={addRootNode}>Add Root Node</Button>
-          </div>
+          <h2 className="text-2xl font-semibold mb-4">
+            Tree State Management
+          </h2>
+
+          {selectedNode && (
+            <div className="mb-4">
+              <p>Selected Node: {selectedNode.name}</p>
+              <Input
+                type="text"
+                placeholder="New Node Name"
+                value={newNodeName}
+                onChange={e => setNewNodeName(e.target.value)}
+                className="mb-2"
+              />
+              <Button onClick={updateNodeName}>Update Node Name</Button>
+
+              <Input
+                type="text"
+                placeholder="New Child Node Name"
+                value={newChildName}
+                onChange={e => setNewChildName(e.target.value)}
+                className="mb-2"
+              />
+              <Button onClick={addChildNode}>Add Child Node</Button>
+            </div>
+          )}
+
           <ScrollArea className="rounded-md border p-4 h-[500px]">
             <Accordion type="single" collapsible>
               {displayTree(stateTree.trees)}
             </Accordion>
           </ScrollArea>
-          {selectedNodeName && (
-            <div className="mt-4">
-              <p>Selected Node: {selectedNodeName}</p>
-            </div>
-          )}
         </div>
       </div>
     </SidebarProvider>

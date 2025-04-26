@@ -73,7 +73,7 @@ export default function Home() {
             const newChild = new TreeNodeBuilder(newChildName).build();
             nodeToUpdate.children = [...nodeToUpdate.children, newChild];
 
-             setExpandedNodes(prevExpandedNodes => {
+            setExpandedNodes(prevExpandedNodes => {
               const updatedExpandedNodes = new Set(prevExpandedNodes);
               updatedExpandedNodes.add(nodeToUpdate.name);
               updatedExpandedNodes.add(newChild.name)
@@ -138,7 +138,6 @@ export default function Home() {
         }
         return new StateTree(newStateTree.trees);
       });
-      setStateTree(prevState => new StateTree([...prevState.trees]));
     }
   };
 
@@ -153,7 +152,6 @@ export default function Home() {
         }
         return new StateTree(newStateTree.trees);
       });
-      setStateTree(prevState => new StateTree([...prevState.trees]));
     }
   };
 

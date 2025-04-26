@@ -62,9 +62,7 @@ export default function Home() {
     if (selectedNode && newChildName) {
       setStateTree(prevState => {
         const newStateTree = new StateTree(prevState.trees);
-        const nodeToUpdate = newStateTree.first(
-          node => node === selectedNode
-        );
+        const nodeToUpdate = newStateTree.first(node => node === selectedNode);
         if (nodeToUpdate) {
           const newChild = new TreeNodeBuilder(newChildName).build();
           nodeToUpdate.children = [...nodeToUpdate.children, newChild];

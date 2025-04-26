@@ -79,10 +79,9 @@ export default function Home() {
               updatedExpandedNodes.add(nodeToUpdate.name);
               return Array.from(updatedExpandedNodes);
             });
-
-            setNewChildName('');
-            return new StateTree(newStateTree.trees);
           }
+          setNewChildName('');
+          return new StateTree(newStateTree.trees);
         }
         return new StateTree(prevState.trees);
       });

@@ -133,10 +133,11 @@ export default function Home() {
         const nodeToUpdate = newStateTree.first(node => node === selectedNode);
         if (nodeToUpdate) {
           nodeToUpdate.isEnabled = !nodeToUpdate.isEnabled;
+           setStateTree(prevState => new StateTree([...prevState.trees]));
         }
         return new StateTree(newStateTree.trees);
       });
-      setStateTree(prevState => new StateTree([...prevState.trees]));
+
     }
   };
 
@@ -147,10 +148,10 @@ export default function Home() {
         const nodeToUpdate = newStateTree.first(node => node === selectedNode);
         if (nodeToUpdate) {
           nodeToUpdate.isCompleted = !nodeToUpdate.isCompleted;
+          setStateTree(prevState => new StateTree([...prevState.trees]));
         }
         return new StateTree(newStateTree.trees);
       });
-        setStateTree(prevState => new StateTree([...prevState.trees]));
     }
   };
 
@@ -166,7 +167,7 @@ export default function Home() {
         value={node.name}
       >
         <AccordionTrigger onClick={() => handleNodeSelection(node)}>
-          <span style={{ fontWeight: 'bold' }}>{node.name}</span> (
+          <span style={{ fontWeight: 'bold', fontSize: (indentLevel === 0 ? '1.2rem' : '1rem') }}>{node.name}</span> (
           {node.isEnabled ? 'Enabled' : 'Disabled'},{' '}
           {node.isCompleted ? 'Completed' : 'Incomplete'}
           )
@@ -266,4 +267,5 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+
 

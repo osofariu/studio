@@ -99,32 +99,38 @@ export default function Home() {
     }
   };
 
-  const handleNodeSelection = (node: TreeNode) => {
-    setSelectedNode(node);
+  const toggleNodeEnable = () => {
+    if (selectedNode) {
+      setStateTree(prevState => {
+        const newStateTree = new StateTree(prevState.trees);
+        const nodeToUpdate = newStateTree.first(node => node === selectedNode);
+        if (nodeToUpdate) {
+          if (nodeToUpdate.isEnabled) {
+            newStateTree.disable(nodeToUpdate);
+          } else {
+            newStateTree.enable(nodeToUpdate);
+          }
+        }
+        return newStateTree;
+      });
+    }
   };
 
-  const toggleNodeEnable = (node: TreeNode) => {
-    setStateTree(prevState => {
-      const newStateTree = new StateTree(prevState.trees);
-      if (node.isEnabled) {
-        newStateTree.disable(node);
-      } else {
-        newStateTree.enable(node);
-      }
-      return newStateTree;
-    });
-  };
-
-  const toggleNodeComplete = (node: TreeNode) => {
-    setStateTree(prevState => {
-      const newStateTree = new StateTree(prevState.trees);
-      if (node.isCompleted) {
-        newStateTree.reset(node);
-      } else {
-        newStateTree.complete(node);
-      }
-      return newStateTree;
-    });
+  const toggleNodeComplete = () => {
+    if (selectedNode) {
+      setStateTree(prevState => {
+        const newStateTree = new StateTree(prevState.trees);
+        const nodeToUpdate = newStateTree.first(node => node === selectedNode);
+        if (nodeToUpdate) {
+          if (nodeToUpdate.isCompleted) {
+            newStateTree.reset(nodeToUpdate);
+          } else {
+            newStateTree.complete(nodeToUpdate);
+          }
+        }
+        return newStateTree;
+      });
+    }
   };
 
   const displayTree = (trees: TreeNode[], indent: string = '') => {
@@ -138,12 +144,6 @@ export default function Home() {
           )
         </AccordionTrigger>
         <AccordionContent>
-          <Button onClick={() => toggleNodeEnable(node)}>
-            {node.isEnabled ? 'Disable' : 'Enable'} Node
-          </Button>
-          <Button onClick={() => toggleNodeComplete(node)}>
-            {node.isCompleted ? 'Reset' : 'Complete'} Node
-          </Button>
           {displayTree(node.children, indent + '  ')}
         </AccordionContent>
       </AccordionItem>
@@ -198,6 +198,12 @@ export default function Home() {
               <Button onClick={addChildNode}>Add Child Node</Button>
               <Button onClick={deleteNode} className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
                 Delete Node
+              </Button>
+              <Button onClick={toggleNodeEnable}>
+                {selectedNode.isEnabled ? 'Disable' : 'Enable'} Node
+              </Button>
+              <Button onClick={toggleNodeComplete}>
+                {selectedNode.isCompleted ? 'Reset' : 'Complete'} Node
               </Button>
             </div>
           )}

@@ -67,9 +67,9 @@ export default function Home() {
           const newChild = new TreeNodeBuilder(newChildName).build();
           nodeToUpdate.children = [...nodeToUpdate.children, newChild];
         }
+        setNewChildName('');
         return newStateTree;
       });
-      setNewChildName('');
     }
   };
 

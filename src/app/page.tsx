@@ -78,6 +78,7 @@ export default function Home() {
               updatedExpandedNodes.add(nodeToUpdate.name);
               return Array.from(updatedExpandedNodes);
             });
+              setExpandedNodes(prevExpandedNodes => [...prevExpandedNodes, newChildName]);
 
             setNewChildName('');
             return new StateTree(newStateTree.trees);
@@ -267,5 +268,3 @@ export default function Home() {
     </SidebarProvider>
   );
 }
-
-

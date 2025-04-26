@@ -76,9 +76,9 @@ export default function Home() {
              setExpandedNodes(prevExpandedNodes => {
               const updatedExpandedNodes = new Set(prevExpandedNodes);
               updatedExpandedNodes.add(nodeToUpdate.name);
+              updatedExpandedNodes.add(newChild.name)
               return Array.from(updatedExpandedNodes);
             });
-              setExpandedNodes(prevExpandedNodes => [...prevExpandedNodes, newChildName]);
 
             setNewChildName('');
             return new StateTree(newStateTree.trees);
@@ -134,11 +134,11 @@ export default function Home() {
         const nodeToUpdate = newStateTree.first(node => node === selectedNode);
         if (nodeToUpdate) {
           nodeToUpdate.isEnabled = !nodeToUpdate.isEnabled;
-           setStateTree(prevState => new StateTree([...prevState.trees]));
+            return new StateTree([...newStateTree.trees]);
         }
         return new StateTree(newStateTree.trees);
       });
-
+       setStateTree(prevState => new StateTree([...prevState.trees]));
     }
   };
 
@@ -149,16 +149,43 @@ export default function Home() {
         const nodeToUpdate = newStateTree.first(node => node === selectedNode);
         if (nodeToUpdate) {
           nodeToUpdate.isCompleted = !nodeToUpdate.isCompleted;
-          setStateTree(prevState => new StateTree([...prevState.trees]));
+           return new StateTree([...newStateTree.trees]);
         }
         return new StateTree(newStateTree.trees);
       });
+       setStateTree(prevState => new StateTree([...prevState.trees]));
     }
   };
 
   const handleNodeSelection = useCallback((node: TreeNode) => {
     setSelectedNode(node);
   }, []);
+
+  const toggleExpanded = (node: TreeNode) => {
+    setExpandedNodes(prevExpandedNodes => {
+      const nodeName = node.name;
+      const isExpanded = prevExpandedNodes.includes(nodeName);
+
+      if (isExpanded) {
+        return prevExpandedNodes.filter(name => name !== nodeName);
+      } else {
+        return [...prevExpandedNodes, nodeName];
+      }
+    });
+  };
+
+  const handleHeaderClick = (node: TreeNode) => {
+    if (selectedNode === node) {
+      toggleExpanded(node);
+    } else {
+      handleNodeSelection(node);
+      setExpandedNodes(prevExpandedNodes => {
+        const updatedExpandedNodes = new Set(prevExpandedNodes);
+        updatedExpandedNodes.add(node.name); // Expand the selected node
+        return Array.from(updatedExpandedNodes);
+      });
+    }
+  };
 
   const displayTree = (trees: TreeNode[], indentLevel: number = 0) => {
     const indent = 1 * indentLevel; // Indent 1rem per level
@@ -167,7 +194,7 @@ export default function Home() {
         key={index}
         value={node.name}
       >
-        <AccordionTrigger onClick={() => handleNodeSelection(node)}>
+        <AccordionTrigger onClick={() => handleHeaderClick(node)}>
           <span style={{ fontWeight: 'bold', fontSize: (indentLevel === 0 ? '1.2rem' : '1rem') }}>{node.name}</span> (
           {node.isEnabled ? 'Enabled' : 'Disabled'},{' '}
           {node.isCompleted ? 'Completed' : 'Incomplete'}

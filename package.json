@@ -1,3 +1,4 @@
+
 {
   "name": "nextn",
   "version": "0.1.0",
@@ -9,7 +10,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "state-tree:build": "tsc",
+    "state-tree:dev": "tsc -w",
+    "state-tree:lint": "eslint src/state-tree/**/*.ts",
+    "state-tree:test": "jest",
+    "state-tree:prepare": "npm run state-tree:build"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.0.4",
@@ -50,6 +56,7 @@
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.54.2",
     "recharts": "^2.15.1",
+    "state-tree": "file:./src/state-tree",
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.24.2"
@@ -58,9 +65,15 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "15.2.3",
     "genkit-cli": "^1.0.4",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "@typescript-eslint/parser": "^7.1.0",
+    "@typescript-eslint/eslint-plugin": "^7.1.0"
   }
 }

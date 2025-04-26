@@ -66,10 +66,11 @@ export default function Home() {
         if (nodeToUpdate) {
           const newChild = new TreeNodeBuilder(newChildName).build();
           nodeToUpdate.children = [...nodeToUpdate.children, newChild];
+          return new StateTree(newStateTree.trees);
         }
-        setNewChildName('');
-        return newStateTree;
+        return prevState;
       });
+      setNewChildName('');
     }
   };
 
@@ -105,11 +106,7 @@ export default function Home() {
         const newStateTree = new StateTree(prevState.trees);
         const nodeToUpdate = newStateTree.first(node => node === selectedNode);
         if (nodeToUpdate) {
-          if (nodeToUpdate.isEnabled) {
-            newStateTree.disable(nodeToUpdate);
-          } else {
-            newStateTree.enable(nodeToUpdate);
-          }
+          nodeToUpdate.isEnabled = !nodeToUpdate.isEnabled;
         }
         return newStateTree;
       });
@@ -122,11 +119,7 @@ export default function Home() {
         const newStateTree = new StateTree(prevState.trees);
         const nodeToUpdate = newStateTree.first(node => node === selectedNode);
         if (nodeToUpdate) {
-          if (nodeToUpdate.isCompleted) {
-            newStateTree.reset(nodeToUpdate);
-          } else {
-            newStateTree.complete(nodeToUpdate);
-          }
+          nodeToUpdate.isCompleted = !nodeToUpdate.isCompleted;
         }
         return newStateTree;
       });
@@ -213,7 +206,7 @@ export default function Home() {
           )}
 
           <ScrollArea className="rounded-md border p-4 h-[500px]">
-            <Accordion type="single" collapsible>
+            <Accordion type="single" collapsible defaultValue={initialTreeData[0].name}>
               {displayTree(stateTree.trees)}
             </Accordion>
           </ScrollArea>

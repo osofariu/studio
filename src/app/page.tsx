@@ -135,7 +135,6 @@ export default function Home() {
         }
         return new StateTree(newStateTree.trees);
       });
-       setStateTree(prevState => new StateTree([...prevState.trees]));
     }
   };
 
@@ -149,7 +148,6 @@ export default function Home() {
         }
         return new StateTree(newStateTree.trees);
       });
-      setStateTree(prevState => new StateTree([...prevState.trees]));
     }
   };
 

@@ -72,9 +72,11 @@ export default function Home() {
           if (!childExists) {
             const newChild = new TreeNodeBuilder(newChildName).build();
             nodeToUpdate.children = [...nodeToUpdate.children, newChild];
-            const updatedExpandedNodes = new Set(expandedNodes);
-            updatedExpandedNodes.add(nodeToUpdate.name);
-            setExpandedNodes(Array.from(updatedExpandedNodes));
+            setExpandedNodes(prevExpandedNodes => {
+              const updatedExpandedNodes = new Set(prevExpandedNodes);
+              updatedExpandedNodes.add(nodeToUpdate.name);
+              return Array.from(updatedExpandedNodes);
+            });
 
             setNewChildName('');
             return new StateTree(newStateTree.trees);
@@ -154,7 +156,7 @@ export default function Home() {
   }, []);
 
   const displayTree = (trees: TreeNode[], indentLevel: number = 0) => {
-    const indent = 5 * indentLevel; // Indent 5rem per level
+    const indent = 1 * indentLevel; // Indent 1rem per level
     return trees.map((node, index) => (
       <AccordionItem
         key={index}
@@ -244,3 +246,4 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+

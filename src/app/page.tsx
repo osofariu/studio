@@ -75,6 +75,32 @@ export default function Home() {
     }
   };
 
+  const deleteNode = () => {
+    if (selectedNode) {
+      setStateTree(prevState => {
+        const newStateTree = new StateTree(prevState.trees);
+
+        // Function to recursively find and delete the node
+        const deleteRecursive = (
+          nodes: TreeNode[],
+          nodeToDelete: TreeNode
+        ): TreeNode[] => {
+          return nodes.filter(node => {
+            if (node === nodeToDelete) {
+              return false; // Exclude the node to delete
+            }
+            node.children = deleteRecursive(node.children, nodeToDelete); // Check children
+            return true; // Keep other nodes
+          });
+        };
+
+        newStateTree.trees = deleteRecursive(newStateTree.trees, selectedNode);
+        return newStateTree;
+      });
+      setSelectedNode(null); // Clear selection after deletion
+    }
+  };
+
   const handleNodeSelection = (node: TreeNode) => {
     setSelectedNode(node);
   };
@@ -172,6 +198,9 @@ export default function Home() {
                 className="mb-2"
               />
               <Button onClick={addChildNode}>Add Child Node</Button>
+              <Button onClick={deleteNode} className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                Delete Node
+              </Button>
             </div>
           )}
 

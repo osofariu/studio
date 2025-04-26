@@ -67,18 +67,22 @@ export default function Home() {
         const newStateTree = new StateTree(prevState.trees);
         const nodeToUpdate = newStateTree.first(node => node === selectedNode);
         if (nodeToUpdate) {
-          const newChild = new TreeNodeBuilder(newChildName).build();
-          nodeToUpdate.children = [...nodeToUpdate.children, newChild];
+          // Check if a child with the same name already exists
+          const childExists = nodeToUpdate.children.some(child => child.name === newChildName);
+          if (!childExists) {
+            const newChild = new TreeNodeBuilder(newChildName).build();
+            nodeToUpdate.children = [...nodeToUpdate.children, newChild];
 
-          // Expand the parent node after adding a child
-          setExpandedNodes(prev => {
-            const updatedExpandedNodes = new Set(prev);
-            updatedExpandedNodes.add(nodeToUpdate.name);
-            return Array.from(updatedExpandedNodes);
-          });
+            // Expand the parent node after adding a child
+            setExpandedNodes(prev => {
+              const updatedExpandedNodes = new Set(prev);
+              updatedExpandedNodes.add(nodeToUpdate.name);
+              return Array.from(updatedExpandedNodes);
+            });
 
-          setNewChildName('');
-          return new StateTree(newStateTree.trees);
+            setNewChildName('');
+            return new StateTree(newStateTree.trees);
+          }
         }
         return new StateTree(prevState.trees);
       });

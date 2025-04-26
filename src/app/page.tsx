@@ -175,6 +175,23 @@ export default function Home() {
     ));
   };
 
+  useEffect(() => {
+    // Function to expand all nodes in the tree
+    const expandAllNodes = (trees: TreeNode[]) => {
+      const allNodeNames: string[] = [];
+      const traverse = (nodes: TreeNode[]) => {
+        nodes.forEach(node => {
+          allNodeNames.push(node.name);
+          traverse(node.children);
+        });
+      };
+      traverse(trees);
+      setExpandedNodes(allNodeNames);
+    };
+
+    expandAllNodes(stateTree.trees);
+  }, [stateTree]);
+
   return (
     <SidebarProvider>
       <div className="flex h-screen bg-gray-100 text-gray-900">
@@ -203,7 +220,7 @@ export default function Home() {
 
           {selectedNode && (
             <div className="mb-4">
-              <p>Selected Node: {selectedNode.name}</p>
+              <p className="text-lg font-semibold">Selected Node: {selectedNode.name}</p>
               <Input
                 type="text"
                 placeholder="New Node Name"

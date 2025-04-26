@@ -1,6 +1,6 @@
 'use client';
 
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {StateTree} from '@/state-tree/state-tree';
 import {TreeNodeBuilder, TreeNode} from '@/state-tree/tree-node';
 import {
@@ -132,6 +132,10 @@ export default function Home() {
       });
     }
   };
+
+  const handleNodeSelection = useCallback((node: TreeNode) => {
+    setSelectedNode(node);
+  }, []);
 
   const displayTree = (trees: TreeNode[], indent: string = '') => {
     return trees.map((node, index) => (

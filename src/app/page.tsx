@@ -72,7 +72,8 @@ export default function Home() {
           if (!childExists) {
             const newChild = new TreeNodeBuilder(newChildName).build();
             nodeToUpdate.children = [...nodeToUpdate.children, newChild];
-            setExpandedNodes(prevExpandedNodes => {
+
+             setExpandedNodes(prevExpandedNodes => {
               const updatedExpandedNodes = new Set(prevExpandedNodes);
               updatedExpandedNodes.add(nodeToUpdate.name);
               return Array.from(updatedExpandedNodes);
@@ -135,7 +136,7 @@ export default function Home() {
         }
         return new StateTree(newStateTree.trees);
       });
-        setStateTree(prevState => new StateTree([...prevState.trees]));
+      setStateTree(prevState => new StateTree([...prevState.trees]));
     }
   };
 
@@ -165,7 +166,7 @@ export default function Home() {
         value={node.name}
       >
         <AccordionTrigger onClick={() => handleNodeSelection(node)}>
-          {node.name} (
+          <span style={{ fontWeight: 'bold' }}>{node.name}</span> (
           {node.isEnabled ? 'Enabled' : 'Disabled'},{' '}
           {node.isCompleted ? 'Completed' : 'Incomplete'}
           )
@@ -265,3 +266,4 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+

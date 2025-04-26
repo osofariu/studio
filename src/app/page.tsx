@@ -55,7 +55,7 @@ export default function Home() {
         if (nodeToUpdate) {
           nodeToUpdate.name = newNodeName;
         }
-        return newStateTree;
+        return new StateTree(newStateTree.trees);
       });
       setNewNodeName('');
     }
@@ -73,12 +73,14 @@ export default function Home() {
           // Expand the parent node after adding a child
           if (!expandedNodes.includes(nodeToUpdate.name)) {
             setExpandedNodes([...expandedNodes, nodeToUpdate.name]);
+          } else {
+            setExpandedNodes(prev => [...prev]); // Trigger re-render if already expanded
           }
 
           setNewChildName('');
           return new StateTree(newStateTree.trees);
         }
-        return prevState;
+        return new StateTree(prevState.trees);
       });
     }
   };
@@ -103,7 +105,7 @@ export default function Home() {
         };
 
         newStateTree.trees = deleteRecursive(newStateTree.trees, selectedNode);
-        return newStateTree;
+        return new StateTree(newStateTree.trees);
       });
       setSelectedNode(null); // Clear selection after deletion
     }
@@ -117,7 +119,7 @@ export default function Home() {
         if (nodeToUpdate) {
           nodeToUpdate.isEnabled = !nodeToUpdate.isEnabled;
         }
-        return newStateTree;
+        return new StateTree(newStateTree.trees);
       });
     }
   };
@@ -130,7 +132,7 @@ export default function Home() {
         if (nodeToUpdate) {
           nodeToUpdate.isCompleted = !nodeToUpdate.isCompleted;
         }
-        return newStateTree;
+        return new StateTree(newStateTree.trees);
       });
     }
   };
@@ -221,7 +223,7 @@ export default function Home() {
           )}
 
           <ScrollArea className="rounded-md border p-4 h-[500px]">
-            <Accordion type="multiple" collapsible defaultValue={expandedNodes}>
+            <Accordion type="multiple" collapsible="true" defaultValue={expandedNodes}>
               {displayTree(stateTree.trees)}
             </Accordion>
           </ScrollArea>

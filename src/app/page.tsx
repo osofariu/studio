@@ -71,11 +71,11 @@ export default function Home() {
           nodeToUpdate.children = [...nodeToUpdate.children, newChild];
 
           // Expand the parent node after adding a child
-          if (!expandedNodes.includes(nodeToUpdate.name)) {
-            setExpandedNodes([...expandedNodes, nodeToUpdate.name]);
-          } else {
-            setExpandedNodes(prev => [...prev]); // Trigger re-render if already expanded
-          }
+          setExpandedNodes(prev => {
+            const updatedExpandedNodes = new Set(prev);
+            updatedExpandedNodes.add(nodeToUpdate.name);
+            return Array.from(updatedExpandedNodes);
+          });
 
           setNewChildName('');
           return new StateTree(newStateTree.trees);
@@ -88,7 +88,7 @@ export default function Home() {
   const deleteNode = () => {
     if (selectedNode) {
       setStateTree(prevState => {
-        const newStateTree = new StateTree(prevState.trees);
+        let newStateTree = new StateTree(prevState.trees);
 
         // Function to recursively find and delete the node
         const deleteRecursive = (
@@ -105,6 +105,18 @@ export default function Home() {
         };
 
         newStateTree.trees = deleteRecursive(newStateTree.trees, selectedNode);
+
+        // If the tree is empty after deleting the node, add a default root node
+        if (newStateTree.trees.length === 0) {
+          newStateTree = new StateTree([
+            new TreeNodeBuilder('Initial Root')
+              .setEnabled(true)
+              .setCompleted(false)
+              .build(),
+          ]);
+          setExpandedNodes(['Initial Root']); // Expand the new root node
+        }
+
         return new StateTree(newStateTree.trees);
       });
       setSelectedNode(null); // Clear selection after deletion

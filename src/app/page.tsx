@@ -72,28 +72,16 @@ export default function Home() {
           if (!childExists) {
             const newChild = new TreeNodeBuilder(newChildName).build();
             nodeToUpdate.children = [...nodeToUpdate.children, newChild];
+            const updatedExpandedNodes = new Set(expandedNodes);
+            updatedExpandedNodes.add(nodeToUpdate.name);
+            setExpandedNodes(Array.from(updatedExpandedNodes));
 
-            // Expand the parent node after adding a child
-            setExpandedNodes(prev => {
-              const updatedExpandedNodes = new Set(prev);
-              updatedExpandedNodes.add(nodeToUpdate.name);
-              return Array.from(updatedExpandedNodes);
-            });
+            setNewChildName('');
+            return new StateTree(newStateTree.trees);
           }
-          setNewChildName('');
-          return new StateTree(newStateTree.trees);
         }
         return new StateTree(prevState.trees);
       });
-
-      // Expand the parent node after adding a child
-      if (selectedNode) {
-        setExpandedNodes(prev => {
-          const updatedExpandedNodes = new Set(prev);
-          updatedExpandedNodes.add(selectedNode.name);
-          return Array.from(updatedExpandedNodes);
-        });
-      }
     }
   };
 
@@ -165,21 +153,21 @@ export default function Home() {
     setSelectedNode(node);
   }, []);
 
-  const displayTree = (trees: TreeNode[], indent: string = '') => {
+  const displayTree = (trees: TreeNode[], indentLevel: number = 0) => {
+    const indent = 5 * indentLevel; // Indent 5rem per level
     return trees.map((node, index) => (
       <AccordionItem
         key={index}
         value={node.name}
       >
         <AccordionTrigger onClick={() => handleNodeSelection(node)}>
-          {indent}
           {node.name} (
           {node.isEnabled ? 'Enabled' : 'Disabled'},{' '}
           {node.isCompleted ? 'Completed' : 'Incomplete'}
           )
         </AccordionTrigger>
-        <AccordionContent>
-          {displayTree(node.children, indent + '  ')}
+        <AccordionContent style={{ paddingLeft: `${indent}rem` }}>
+          {displayTree(node.children, indentLevel + 1)}
         </AccordionContent>
       </AccordionItem>
     ));

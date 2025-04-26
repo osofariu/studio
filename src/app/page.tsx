@@ -41,6 +41,9 @@ export default function Home() {
   const [selectedNode, setSelectedNode] = useState<TreeNode | null>(null);
   const [newNodeName, setNewNodeName] = useState('');
   const [newChildName, setNewChildName] = useState('');
+  const [expandedNodes, setExpandedNodes] = useState<string[]>(
+    initialTreeData.map(node => node.name)
+  ); // Initialize with root node expanded
 
   const updateNodeName = () => {
     if (selectedNode && newNodeName) {
@@ -66,11 +69,17 @@ export default function Home() {
         if (nodeToUpdate) {
           const newChild = new TreeNodeBuilder(newChildName).build();
           nodeToUpdate.children = [...nodeToUpdate.children, newChild];
+
+          // Expand the parent node after adding a child
+          if (!expandedNodes.includes(nodeToUpdate.name)) {
+            setExpandedNodes([...expandedNodes, nodeToUpdate.name]);
+          }
+
+          setNewChildName('');
           return new StateTree(newStateTree.trees);
         }
         return prevState;
       });
-      setNewChildName('');
     }
   };
 
@@ -132,7 +141,10 @@ export default function Home() {
 
   const displayTree = (trees: TreeNode[], indent: string = '') => {
     return trees.map((node, index) => (
-      <AccordionItem key={index} value={node.name}>
+      <AccordionItem
+        key={index}
+        value={node.name}
+      >
         <AccordionTrigger onClick={() => handleNodeSelection(node)}>
           {indent}
           {node.name} (
@@ -193,7 +205,10 @@ export default function Home() {
                 className="mb-2"
               />
               <Button onClick={addChildNode}>Add Child Node</Button>
-              <Button onClick={deleteNode} className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+              <Button
+                onClick={deleteNode}
+                className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+              >
                 Delete Node
               </Button>
               <Button onClick={toggleNodeEnable}>
@@ -206,7 +221,7 @@ export default function Home() {
           )}
 
           <ScrollArea className="rounded-md border p-4 h-[500px]">
-            <Accordion type="single" collapsible defaultValue={initialTreeData[0].name}>
+            <Accordion type="multiple" collapsible defaultValue={expandedNodes}>
               {displayTree(stateTree.trees)}
             </Accordion>
           </ScrollArea>

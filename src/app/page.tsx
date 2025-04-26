@@ -82,6 +82,15 @@ export default function Home() {
         }
         return new StateTree(prevState.trees);
       });
+
+      // Expand the parent node after adding a child
+      if (selectedNode) {
+        setExpandedNodes(prev => {
+          const updatedExpandedNodes = new Set(prev);
+          updatedExpandedNodes.add(selectedNode.name);
+          return Array.from(updatedExpandedNodes);
+        });
+      }
     }
   };
 

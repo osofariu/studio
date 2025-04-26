@@ -84,6 +84,11 @@ export default function Home() {
         }
         return new StateTree(prevState.trees);
       });
+        setExpandedNodes(prevExpandedNodes => {
+          const updatedExpandedNodes = new Set(prevExpandedNodes);
+          if (selectedNode) updatedExpandedNodes.add(selectedNode.name);
+          return Array.from(updatedExpandedNodes);
+        });
     }
   };
 
@@ -291,3 +296,4 @@ export default function Home() {
     </SidebarProvider>
   );
 }
+

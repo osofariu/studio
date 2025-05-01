@@ -70,8 +70,8 @@ export default function Home() {
   const [isEditingSurveyName, setIsEditingSurveyName] = useState(false);
 
   useEffect(() => {
-    console.log(`selected node changed! ${JSON.stringify(selectedNode)}`)
-  }, [selectedNode])
+    console.log(`expandedNodes node changed! ${JSON.stringify(expandedNodes)}`)
+  }, [expandedNodes])
 
   const updateNodeName = () => {
     if (selectedNode && newNodeName) {
@@ -158,7 +158,6 @@ export default function Home() {
   };
 
   const toggleNodeEnable = () => {
-    console.log('TOGGLE enabled')
     setStateTree((prevTree) => {
       if (selectedNode) {
         const newTree = new Survey([], prevTree.name);
@@ -216,7 +215,7 @@ export default function Home() {
     }
   }, [expandedNodes, setSelectedNode, handleNodeSelection]);
 
-  const displayTree = (trees: Question[], indentLevel: number = 0) => {
+  const displayTree = (trees: Question[], indentLevel: number = 1) => {
     const indent = 1 * indentLevel; // Indent 1rem per level
     return trees.map((node, index) => (
       <AccordionItem

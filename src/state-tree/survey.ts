@@ -3,16 +3,38 @@ import { Question } from './question';
 export class Survey {
     name: string;
     questions: Question[];
+    version: number;
 
     constructor(questions: Question[] = [], name: string = "") {
         this.questions = questions;
         this.name = name;
+        this.version = 0;
     }
     setName(name: string) {
         this.name = name;
+        this.incrementVersion();
     }
     updateQuestions(questions: Question[]) {
+        const updatedQuestions = []
+        const deepCopy = (q: Question) => {
+            const newQuestion = new Question(q.name, q.isEnabled, q.isCompleted)
+            for (const child of q.children) {
+                newQuestion.children.push(deepCopy(child))
+            }
+            return newQuestion;
+        }
+        for (const q of questions) {
+            updatedQuestions.push(deepCopy(q))
+        }
+        this.questions = updatedQuestions;
+        this.incrementVersion();
+    }
+    reset(questions: Question[]) {
         this.questions = questions;
+        this.incrementVersion();
+    }
+    private incrementVersion() {
+        this.version += 1;
     }
     
     addQuestion(question: Question): void {
@@ -23,18 +45,29 @@ export class Survey {
     // Enable a node and all its children
     enable(node: Question): void {
         node.isEnabled = true;
-        node.children.forEach(child => this.enable(child));
+        node.children.forEach(child => this.enable(child)); 
+        this.incrementVersion();
     }
 
     // Disable a node and all its children
     disable(node: Question): void {
         node.isEnabled = false;
         node.children.forEach(child => this.disable(child));
+        this.incrementVersion();
+    }
+
+    toggle(node: Question): void {
+        if (node.isEnabled) {
+            this.disable(node);
+        } else {
+            this.enable(node);
+        }
     }
 
     // Complete a node
     complete(node: Question): void {
         node.isCompleted = true;
+        this.incrementVersion();
     }
 
     // Reset a node to incomplete
@@ -79,6 +112,7 @@ export class Survey {
         return count;
     }
     private validateTreeStructure(): void {
+        
          for (const question of this.questions) {
             if(question.children.includes(question)){
                 throw Error("Tree contains itself as a child");

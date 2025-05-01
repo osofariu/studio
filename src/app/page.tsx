@@ -1,8 +1,8 @@
 'use client';
 
-import React, {useState, useEffect, useCallback} from 'react';
-import {Survey} from '@/state-tree/survey';
-import {Question} from '@/state-tree/question';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Survey } from '@/state-tree/survey';
+import { Question } from '@/state-tree/question';
 import {
   Sidebar,
   SidebarContent,
@@ -13,15 +13,15 @@ import {
   SidebarSeparator,
   SidebarProvider,
 } from '@/components/ui/sidebar';
-import {Button} from '@/components/ui/button';
-import {Input} from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import {ScrollArea} from '@/components/ui/scroll-area';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 // Theme import
 import './globals.css';
@@ -29,7 +29,7 @@ import './globals.css';
 const defaultAccentColor = 'hsl(174, 100%, 29%)';
 
 // Example Tree Data
-const initialQuestions: Question[] = [ 
+const initialQuestions: Question[] = [
   new Question('Initial Root', true, false)]
 
 export default function Home() {
@@ -42,19 +42,23 @@ export default function Home() {
   const [surveyName, setSurveyName] = useState('Default Survey');
   const [isEditingSurveyName, setIsEditingSurveyName] = useState(false);
 
+  useEffect(() => {
+    console.log(`selected node changed! ${JSON.stringify(selectedNode)}`)
+  }, [selectedNode])
+
   const updateNodeName = () => {
     if (selectedNode && newNodeName) {
       setStateTree(prevState => {
         const newStateTree = new Survey(prevState.questions);
         const nodeToUpdate = newStateTree.first(
-          node => node === selectedNode 
+          node => node === selectedNode
         );
         if (nodeToUpdate) {
           nodeToUpdate.name = newNodeName;
         }
         return newStateTree;
       });
-        setNewNodeName('');
+      setNewNodeName('');
     }
   };
 
@@ -77,17 +81,17 @@ export default function Home() {
               return Array.from(updatedExpandedNodes);
             });
 
-            setNewChildName('');          
+            setNewChildName('');
             return newStateTree;
           }
         }
         return prevState;
       });
-        setExpandedNodes(prevExpandedNodes => {
-          const updatedExpandedNodes = new Set(prevExpandedNodes);
-          if (selectedNode) updatedExpandedNodes.add(selectedNode.name);
-          return Array.from(updatedExpandedNodes);
-        });
+      setExpandedNodes(prevExpandedNodes => {
+        const updatedExpandedNodes = new Set(prevExpandedNodes);
+        if (selectedNode) updatedExpandedNodes.add(selectedNode.name);
+        return Array.from(updatedExpandedNodes);
+      });
     }
   };
 
@@ -122,34 +126,40 @@ export default function Home() {
 
         return newStateTree;
       });
-        setSelectedNode(null); // Clear selection after deletion
+      setSelectedNode(null); // Clear selection after deletion
     }
   };
 
-  const toggleNodeEnable = () => {
+const toggleNodeEnable = () => {
     console.log('TOGGLE enabled')
-    if (selectedNode) {
-      setStateTree((prevTree) => {
-        const nodeToUpdate = prevTree.first((node) => node === selectedNode);
+    setStateTree((prevTree) => {
+      if (selectedNode) {
+        const newTree = new Survey([], prevTree.name);
+        newTree.updateQuestions(prevTree.questions) 
+        const nodeToUpdate = newTree.first((node) => node.name === selectedNode.name);
         if (nodeToUpdate) {
-          nodeToUpdate.isEnabled = !nodeToUpdate?.isEnabled
+          newTree.toggle(nodeToUpdate)
+          setSelectedNode(nodeToUpdate);
         }
-        console.log(`state after : ${JSON.stringify(prevTree)}`)
-        return prevTree
-      });
-    }
+        return newTree
+      }
+      return prevTree
+    });
   };
+
 
   const toggleNodeComplete = () => {
     if (selectedNode) {
       setStateTree(prevState => {
-        const newStateTree = new Survey(prevState.questions);
-        const nodeToUpdate = newStateTree.first(node => node === selectedNode);
+        const newStateTree = new Survey([], prevState.name);
+        newStateTree.updateQuestions(prevState.questions) 
+        const nodeToUpdate = newStateTree.first(node => node.name === selectedNode.name);
         if (nodeToUpdate) {
           nodeToUpdate.isCompleted = !nodeToUpdate.isCompleted;
+          setSelectedNode(nodeToUpdate);
           return new Survey(newStateTree.questions);
         }
-          return prevState;
+        return prevState;
       });
     }
   };
@@ -206,10 +216,10 @@ export default function Home() {
     ));
   };
 
-    const handleSetSurveyName = () => {
-        stateTree.setName(surveyName);
-        setIsEditingSurveyName(false);
-    };
+  const handleSetSurveyName = () => {
+    stateTree.setName(surveyName);
+    setIsEditingSurveyName(false);
+  };
   return (
     <SidebarProvider>
       <div className="flex h-screen bg-gray-100 text-gray-900">
@@ -236,29 +246,29 @@ export default function Home() {
             Tree State Management
           </h2>
 
-            <div className='mb-4 flex items-center'>
-                {isEditingSurveyName ? (
-                    <>
-                        <Input
-                            type="text"
-                            placeholder="Survey Name"
-                            value={surveyName}
-                            onChange={e => setSurveyName(e.target.value)}
-                            className="mr-2"
-                        />
-                        <Button onClick={handleSetSurveyName}>Set Name</Button>
-                    </>
-                ) : (
-                    <>
-                        <p className="text-lg font-semibold mb-2">{stateTree.name}</p>
-                        <div className='ml-auto'>
-                            <Button onClick={() => setIsEditingSurveyName(true)} className="text-sm"
-                            >Set Name
-                            </Button>
-                        </div>
-                    </>
-                )}
-              </div>
+          <div className='mb-4 flex items-center'>
+            {isEditingSurveyName ? (
+              <>
+                <Input
+                  type="text"
+                  placeholder="Survey Name"
+                  value={surveyName}
+                  onChange={e => setSurveyName(e.target.value)}
+                  className="mr-2"
+                />
+                <Button onClick={handleSetSurveyName}>Set Name</Button>
+              </>
+            ) : (
+              <>
+                <p className="text-lg font-semibold mb-2">{stateTree.name}</p>
+                <div className='ml-auto'>
+                  <Button onClick={() => setIsEditingSurveyName(true)} className="text-sm"
+                  >Set Name
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
 
           {selectedNode && (
             <div className="mb-4">

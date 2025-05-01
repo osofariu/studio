@@ -49,10 +49,12 @@ export class Question implements QuestionTree {
       return result;
     }
 
-    count(filter: (node: Question) => boolean): number {
+    count(filter?: (node: Question) => boolean): number {
       let count = 0;
       const traverse = (node: Question) => {
           if (filter && filter(node)) {
+              count++;
+          } else if (!filter) {
               count++;
           }
           node.children.forEach(traverse);

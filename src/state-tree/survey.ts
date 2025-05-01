@@ -103,11 +103,10 @@ export class Survey {
     }
 
     // Count the number of nodes that match the filter
-    count(filter: (node: Question) => boolean): number {
+    count(filter?: (node: Question) => boolean): number {
         let count = 0;
         for (const question of this.questions) {
             count += question.count(filter);
-            
         }
         return count;
     }

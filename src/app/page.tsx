@@ -1,8 +1,8 @@
 'use client';
 
 import React, {useState, useEffect, useCallback} from 'react';
-import {StateTree} from '@/state-tree/state-tree';
-import {TreeNodeBuilder, TreeNode} from '@/state-tree/tree-node';
+import {Survey} from '@/state-tree/survey';
+import {Question} from '@/state-tree/question';
 import {
   Sidebar,
   SidebarContent,
@@ -29,46 +29,45 @@ import './globals.css';
 const defaultAccentColor = 'hsl(174, 100%, 29%)';
 
 // Example Tree Data
-const initialTreeData: TreeNode[] = [
-  new TreeNodeBuilder('Initial Root')
-    .setEnabled(true)
-    .setCompleted(false)
-    .build(),
-];
+const initialQuestions: Question[] = [ 
+  new Question('Initial Root', true, false)]
 
 export default function Home() {
-  const [stateTree, setStateTree] = useState(new StateTree(initialTreeData));
-  const [selectedNode, setSelectedNode] = useState<TreeNode | null>(null);
+
+  const [stateTree, setStateTree] = useState(new Survey(initialQuestions));
+  const [selectedNode, setSelectedNode] = useState<Question | null>(null);
   const [newNodeName, setNewNodeName] = useState('');
   const [newChildName, setNewChildName] = useState('');
   const [expandedNodes, setExpandedNodes] = useState<string[]>([]);
+  const [surveyName, setSurveyName] = useState('Default Survey');
+  const [isEditingSurveyName, setIsEditingSurveyName] = useState(false);
 
   const updateNodeName = () => {
     if (selectedNode && newNodeName) {
       setStateTree(prevState => {
-        const newStateTree = new StateTree(prevState.trees);
+        const newStateTree = new Survey(prevState.questions);
         const nodeToUpdate = newStateTree.first(
-          node => node === selectedNode
+          node => node === selectedNode 
         );
         if (nodeToUpdate) {
           nodeToUpdate.name = newNodeName;
         }
-        return new StateTree(newStateTree.trees);
+        return newStateTree;
       });
-      setNewNodeName('');
+        setNewNodeName('');
     }
   };
 
   const addChildNode = () => {
     if (selectedNode && newChildName) {
       setStateTree(prevState => {
-        const newStateTree = new StateTree(prevState.trees);
+        const newStateTree = new Survey(prevState.questions);
         const nodeToUpdate = newStateTree.first(node => node === selectedNode);
         if (nodeToUpdate) {
           // Check if a child with the same name already exists
           const childExists = nodeToUpdate.children.some(child => child.name === newChildName);
           if (!childExists) {
-            const newChild = new TreeNodeBuilder(newChildName).build();
+            const newChild = new Question(newChildName);
             nodeToUpdate.children = [...nodeToUpdate.children, newChild];
 
             setExpandedNodes(prevExpandedNodes => {
@@ -78,11 +77,11 @@ export default function Home() {
               return Array.from(updatedExpandedNodes);
             });
 
-            setNewChildName('');
-            return new StateTree(newStateTree.trees);
+            setNewChildName('');          
+            return newStateTree;
           }
         }
-        return new StateTree(prevState.trees);
+        return prevState;
       });
         setExpandedNodes(prevExpandedNodes => {
           const updatedExpandedNodes = new Set(prevExpandedNodes);
@@ -95,13 +94,13 @@ export default function Home() {
   const deleteNode = () => {
     if (selectedNode) {
       setStateTree(prevState => {
-        let newStateTree = new StateTree(prevState.trees);
+        let newStateTree = new Survey(prevState.questions);
 
         // Function to recursively find and delete the node
         const deleteRecursive = (
-          nodes: TreeNode[],
-          nodeToDelete: TreeNode
-        ): TreeNode[] => {
+          nodes: Question[],
+          nodeToDelete: Question
+        ): Question[] => {
           return nodes.filter(node => {
             if (node === nodeToDelete) {
               return false; // Exclude the node to delete
@@ -111,35 +110,32 @@ export default function Home() {
           });
         };
 
-        newStateTree.trees = deleteRecursive(newStateTree.trees, selectedNode);
+        newStateTree.questions = deleteRecursive(newStateTree.questions, selectedNode);
 
         // If the tree is empty after deleting the node, add a default root node
-        if (newStateTree.trees.length === 0) {
-          newStateTree = new StateTree([
-            new TreeNodeBuilder('Initial Root')
-              .setEnabled(true)
-              .setCompleted(false)
-              .build(),
+        if (newStateTree.questions.length === 0) {
+          newStateTree = new Survey([
+            new Question('Initial Root', true, false)
           ]);
           setExpandedNodes(['Initial Root']); // Expand the new root node
         }
 
-        return new StateTree(newStateTree.trees);
+        return newStateTree;
       });
-      setSelectedNode(null); // Clear selection after deletion
+        setSelectedNode(null); // Clear selection after deletion
     }
   };
 
   const toggleNodeEnable = () => {
+    console.log('TOGGLE enabled')
     if (selectedNode) {
-      setStateTree(prevState => {
-        const newStateTree = new StateTree(prevState.trees);
-        const nodeToUpdate = newStateTree.first(node => node === selectedNode);
+      setStateTree((prevTree) => {
+        const nodeToUpdate = prevTree.first((node) => node === selectedNode);
         if (nodeToUpdate) {
-          nodeToUpdate.isEnabled = !nodeToUpdate.isEnabled;
-          return new StateTree([...newStateTree.trees]);
+          nodeToUpdate.isEnabled = !nodeToUpdate?.isEnabled
         }
-        return new StateTree(newStateTree.trees);
+        console.log(`state after : ${JSON.stringify(prevTree)}`)
+        return prevTree
       });
     }
   };
@@ -147,22 +143,23 @@ export default function Home() {
   const toggleNodeComplete = () => {
     if (selectedNode) {
       setStateTree(prevState => {
-        const newStateTree = new StateTree(prevState.trees);
+        const newStateTree = new Survey(prevState.questions);
         const nodeToUpdate = newStateTree.first(node => node === selectedNode);
         if (nodeToUpdate) {
           nodeToUpdate.isCompleted = !nodeToUpdate.isCompleted;
-          return new StateTree([...newStateTree.trees]);
+          return new Survey(newStateTree.questions);
         }
-        return new StateTree(newStateTree.trees);
+          return prevState;
       });
     }
   };
 
-  const handleNodeSelection = useCallback((node: TreeNode) => {
+  const handleNodeSelection = useCallback((node: Question) => {
+    console.log(`selected node: ${node.name}`)
     setSelectedNode(node);
   }, []);
 
-  const toggleExpanded = (node: TreeNode) => {
+  const toggleExpanded = (node: Question) => {
     setExpandedNodes(prevExpandedNodes => {
       const nodeName = node.name;
       const isExpanded = prevExpandedNodes.includes(nodeName);
@@ -175,7 +172,7 @@ export default function Home() {
     });
   };
 
-  const handleHeaderClick = (node: TreeNode) => {
+  const handleHeaderClick = (node: Question) => {
     if (selectedNode === node) {
       toggleExpanded(node);
     } else {
@@ -188,7 +185,7 @@ export default function Home() {
     }
   };
 
-  const displayTree = (trees: TreeNode[], indentLevel: number = 0) => {
+  const displayTree = (trees: Question[], indentLevel: number = 0) => {
     const indent = 1 * indentLevel; // Indent 1rem per level
     return trees.map((node, index) => (
       <AccordionItem
@@ -202,29 +199,17 @@ export default function Home() {
           )
         </AccordionTrigger>
         <AccordionContent style={{ paddingLeft: `${indent}rem` }}>
+
           {displayTree(node.children, indentLevel + 1)}
         </AccordionContent>
       </AccordionItem>
     ));
   };
 
-  useEffect(() => {
-    // Function to expand all nodes in the tree
-    const expandAllNodes = (trees: TreeNode[]) => {
-      const allNodeNames: string[] = [];
-      const traverse = (nodes: TreeNode[]) => {
-        nodes.forEach(node => {
-          allNodeNames.push(node.name);
-          traverse(node.children);
-        });
-      };
-      traverse(trees);
-      setExpandedNodes(allNodeNames);
+    const handleSetSurveyName = () => {
+        stateTree.setName(surveyName);
+        setIsEditingSurveyName(false);
     };
-
-    expandAllNodes(stateTree.trees);
-  }, [stateTree]);
-
   return (
     <SidebarProvider>
       <div className="flex h-screen bg-gray-100 text-gray-900">
@@ -250,6 +235,30 @@ export default function Home() {
           <h2 className="text-2xl font-semibold mb-4">
             Tree State Management
           </h2>
+
+            <div className='mb-4 flex items-center'>
+                {isEditingSurveyName ? (
+                    <>
+                        <Input
+                            type="text"
+                            placeholder="Survey Name"
+                            value={surveyName}
+                            onChange={e => setSurveyName(e.target.value)}
+                            className="mr-2"
+                        />
+                        <Button onClick={handleSetSurveyName}>Set Name</Button>
+                    </>
+                ) : (
+                    <>
+                        <p className="text-lg font-semibold mb-2">{stateTree.name}</p>
+                        <div className='ml-auto'>
+                            <Button onClick={() => setIsEditingSurveyName(true)} className="text-sm"
+                            >Set Name
+                            </Button>
+                        </div>
+                    </>
+                )}
+              </div>
 
           {selectedNode && (
             <div className="mb-4">
@@ -287,8 +296,8 @@ export default function Home() {
           )}
 
           <ScrollArea className="rounded-md border p-4 h-[500px]">
-            <Accordion type="multiple" collapsible="true" defaultValue={expandedNodes}>
-              {displayTree(stateTree.trees)}
+            <Accordion type="multiple" defaultValue={expandedNodes}>
+              {displayTree(stateTree.questions)}
             </Accordion>
           </ScrollArea>
         </div>

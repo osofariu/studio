@@ -15,7 +15,8 @@
     "state-tree:dev": "tsc -w",
     "state-tree:lint": "eslint src/state-tree/**/*.ts",
     "state-tree:test": "jest",
-    "state-tree:prepare": "npm run state-tree:build"
+    "state-tree:prepare": "npm run state-tree:build",
+     "test": "jest"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.0.4",

@@ -1,3 +1,3 @@
 
-export { StateTree } from './state-tree';
-export type { TreeNode } from './tree-node';
+export { Survey as StateTree } from './survey';
+export type { QuestionTree as TreeNode } from './question';

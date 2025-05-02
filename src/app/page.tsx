@@ -35,21 +35,21 @@ const initialQuestions: Question[] = [
 export default function Home() {
 
   const [stateTree, setStateTree] = useState(new Survey(initialQuestions));
-    const surveyStatistics = {
-        totalQuestions: stateTree.count(),
-        enabledQuestions: stateTree.count(q=> q.isEnabled),
-        disabledQuestions: stateTree.count(q => !q.isEnabled),
-        completedQuestions: stateTree.count(q=> q.isCompleted),
-        incompletedQuestions: stateTree.count(q=> !q.isCompleted),
-    };
+  const surveyStatistics = {
+    totalQuestions: stateTree.count(),
+    enabledQuestions: stateTree.count(q => q.isEnabled),
+    disabledQuestions: stateTree.count(q => !q.isEnabled),
+    completedQuestions: stateTree.count(q => q.isCompleted),
+    incompletedQuestions: stateTree.count(q => !q.isCompleted),
+  };
 
-    useEffect(() => {
-        surveyStatistics.totalQuestions = stateTree.count()
-        surveyStatistics.enabledQuestions = stateTree.count(q=> q.isEnabled)
-        surveyStatistics.disabledQuestions = stateTree.count(q => !q.isEnabled)
-        surveyStatistics.completedQuestions = stateTree.count(q=> q.isCompleted)
-        surveyStatistics.incompletedQuestions = stateTree.count(q=> !q.isCompleted)
-    }, [stateTree])
+  useEffect(() => {
+    surveyStatistics.totalQuestions = stateTree.count()
+    surveyStatistics.enabledQuestions = stateTree.count(q => q.isEnabled)
+    surveyStatistics.disabledQuestions = stateTree.count(q => !q.isEnabled)
+    surveyStatistics.completedQuestions = stateTree.count(q => q.isCompleted)
+    surveyStatistics.incompletedQuestions = stateTree.count(q => !q.isCompleted)
+  }, [stateTree])
 
   const [selectedNode, setSelectedNode] = useState<Question | null>(() => {
     // Select the initial root node by default
@@ -62,7 +62,7 @@ export default function Home() {
   const [expandedNodes, setExpandedNodes] = useState<string[]>(() => {
     // Initially expand only the root node
     return initialQuestions.length > 0 ? [initialQuestions[0].name] : [];
-});
+  });
 
 
 
@@ -242,6 +242,19 @@ export default function Home() {
     stateTree.setName(surveyName);
     setIsEditingSurveyName(false);
   };
+
+  const EnabledNodeList = ({ survey }: { survey: Survey }) => {
+    const version = survey.version
+    const enabledNodes = survey.traverse(q => q.isEnabled)
+    return (
+      <div
+        className="mt-4">
+        <h3 className="font-semibold mb-2">Enabled Nodes</h3>
+        <ul>
+          {enabledNodes.map((node: Question, index: number) =>
+            <li key={index} style={{ color: node.isCompleted ? 'green' : 'black' }}>{node.name}</li>)}</ul></div>);
+  };
+
   return (
     <SidebarProvider>
       <div className="flex h-screen bg-gray-100 text-gray-900">
@@ -263,99 +276,100 @@ export default function Home() {
           </SidebarContent>
         </Sidebar>
 
-          <div className="flex-1 p-4 overflow-auto flex">
-            <div className="w-3/4">
-              <h2 className="text-2xl font-semibold mb-4">
-                Tree State Management
-              </h2>
+        <div className="flex-1 p-4 overflow-auto flex">
+          <div className="w-3/4">
+            <h2 className="text-2xl font-semibold mb-4">
+              Tree State Management
+            </h2>
 
-              <div className='mb-4 flex items-center'>
-                {isEditingSurveyName ? (
-                  <>
-                    <Input
+            <div className='mb-4 flex items-center'>
+              {isEditingSurveyName ? (
+                <>
+                  <Input
+                    type="text"
+                    placeholder="Survey Name"
+                    value={surveyName}
+                    onChange={e => setSurveyName(e.target.value)}
+                    className="mr-2"
+                  />
+                  <Button onClick={handleSetSurveyName}>Set Name</Button>
+                </>
+              ) : (
+                <>
+                  <p className="text-lg font-semibold mb-2">{stateTree.name}</p>
+                  <div className='ml-auto'>
+                    <Button onClick={() => setIsEditingSurveyName(true)} className="text-sm"
+                    >Set Name
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {selectedNode && (
+              <div className="mb-4">
+                <p className="text-lg font-semibold">Selected: {selectedNode.name}</p>
+                <Input
                   type="text"
-                  placeholder="Survey Name"
-                  value={surveyName}
-                  onChange={e => setSurveyName(e.target.value)}
-                  className="mr-2"
+                  placeholder="New Node Name"
+                  value={newNodeName}
+                  onChange={e => setNewNodeName(e.target.value)}
+                  className="mb-2"
                 />
-                <Button onClick={handleSetSurveyName}>Set Name</Button>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-lg font-semibold mb-2">{stateTree.name}</p>
-                    <div className='ml-auto'>
-                      <Button onClick={() => setIsEditingSurveyName(true)} className="text-sm"
-                  >Set Name
-                      </Button>
-                    </div>
-                  </>
-                )}
+                <Button onClick={updateNodeName}>Update Name</Button>
+
+                <Input
+                  type="text"
+                  placeholder="New Child Node Name"
+                  value={newChildName}
+                  onChange={e => setNewChildName(e.target.value)}
+                  className="mb-2"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && newChildName) {
+                      addChildNode();
+                    }
+                  }}
+                />
+                <Button onClick={addChildNode}>Add Child</Button>
+                <Button
+                  onClick={deleteNode}
+                  className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                >
+                  Delete Node
+                </Button>
+                <Button onClick={toggleNodeEnable}>
+                  {selectedNode.isEnabled ? 'Disable' : 'Enable'}
+                </Button>
+                <Button onClick={toggleNodeComplete}>
+                  {selectedNode.isCompleted ? 'Reset' : 'Complete'}
+                </Button>
+              </div>
+            )}
+
+            <ScrollArea className="rounded-md border p-4 h-[500px]">
+              <Accordion type="multiple" defaultValue={expandedNodes}>
+                {displayTree(stateTree.questions)}
+              </Accordion>
+            </ScrollArea>
           </div>
 
-          {selectedNode && (
-            <div className="mb-4">
-              <p className="text-lg font-semibold">Selected: {selectedNode.name}</p>
-              <Input
-                type="text"
-                placeholder="New Node Name"
-                value={newNodeName}
-                onChange={e => setNewNodeName(e.target.value)}
-                className="mb-2"
-              />
-              <Button onClick={updateNodeName}>Update Name</Button>
-
-              <Input
-              type="text"
-              placeholder="New Child Node Name"
-              value={newChildName}
-              onChange={e => setNewChildName(e.target.value)}
-              className="mb-2"
-              onKeyDown={(e) => {
-                  if (e.key === 'Enter' && newChildName) {
-                      addChildNode();
-                  }
-              }}
-              />
-              <Button onClick={addChildNode}>Add Child</Button>
-              <Button
-                onClick={deleteNode}
-                className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-              >
-                Delete Node
-              </Button>
-              <Button onClick={toggleNodeEnable}>
-                {selectedNode.isEnabled ? 'Disable' : 'Enable'}
-              </Button>
-              <Button onClick={toggleNodeComplete}>
-                {selectedNode.isCompleted ? 'Reset' : 'Complete'}
-              </Button>
-            </div>
-          )}
-
-          <ScrollArea className="rounded-md border p-4 h-[500px]">
-            <Accordion type="multiple" defaultValue={expandedNodes}>
-              {displayTree(stateTree.questions)}
-            </Accordion>
-            </ScrollArea>
-            </div>
-
-            <div className="w-1/4 ml-4 p-4 border rounded">
-              <h3 className="font-semibold mb-2">Survey Statistics</h3>
-              <ul className="text-sm">
-                <li className="flex justify-between">
-                  <span>Questions:</span> <span className="text-right">{surveyStatistics.totalQuestions}</span>
-                </li>
-                <li className="flex justify-between">
-                  <span>Enabled:</span> <span className="text-right">{surveyStatistics.enabledQuestions}</span>
-                </li>
-                <li className="flex justify-between">
-                  <span>Disabled:</span> <span className="text-right">{surveyStatistics.disabledQuestions}</span>
-                </li>
-                <li className="flex justify-between">Completed: <span className="text-right">{surveyStatistics.completedQuestions}</span></li>
-                <li className="flex justify-between">Incomplete: <span className="text-right">{surveyStatistics.incompletedQuestions}</span></li>
-                </ul>
-            </div>
+          <div className="w-1/4 ml-4 p-4 border rounded">
+            <h3 className="font-semibold mb-2">Survey Statistics</h3>
+            <ul className="text-sm">
+              <li className="flex justify-between">
+                <span>Questions:</span> <span className="text-right">{surveyStatistics.totalQuestions}</span>
+              </li>
+              <li className="flex justify-between">
+                <span>Enabled:</span> <span className="text-right">{surveyStatistics.enabledQuestions}</span>
+              </li>
+              <li className="flex justify-between">
+                <span>Disabled:</span> <span className="text-right">{surveyStatistics.disabledQuestions}</span>
+              </li>
+              <li className="flex justify-between">Completed: <span className="text-right">{surveyStatistics.completedQuestions}</span></li>
+              <li className="flex justify-between">Incomplete: <span className="text-right">{surveyStatistics.incompletedQuestions}</span></li>
+            </ul>
+            <EnabledNodeList survey={stateTree} />
+          </div>
 
 
         </div>

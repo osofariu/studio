@@ -306,11 +306,16 @@ export default function Home() {
               <Button onClick={updateNodeName}>Update Name</Button>
 
               <Input
-                type="text"
-                placeholder="New Child Node Name"
-                value={newChildName}
-                onChange={e => setNewChildName(e.target.value)}
-                className="mb-2"
+              type="text"
+              placeholder="New Child Node Name"
+              value={newChildName}
+              onChange={e => setNewChildName(e.target.value)}
+              className="mb-2"
+              onKeyDown={(e) => {
+                  if (e.key === 'Enter' && newChildName) {
+                      addChildNode();
+                  }
+              }}
               />
               <Button onClick={addChildNode}>Add Child</Button>
               <Button

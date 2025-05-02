@@ -329,7 +329,7 @@ export default function Home() {
           )}
 
           <ScrollArea className="rounded-md border p-4 h-[500px]">
-            <Accordion type="multiple">
+            <Accordion type="multiple" defaultValue={expandedNodes}>
               {displayTree(stateTree.questions)}
             </Accordion>
             </ScrollArea>

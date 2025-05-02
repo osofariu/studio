@@ -26,45 +26,45 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 // Theme import
 import './globals.css';
 
-const defaultAccentColor = 'hsl(174, 100%, 29%)';
-
 // Example Tree Data
 const initialQuestions: Question[] = [
   new Question('Initial Root', true, false)]
 
 export default function Home() {
 
-  const [stateTree, setStateTree] = useState(new Survey(initialQuestions));
+  const [stateTree, setStateTree] = useState<Survey | null>(null);
   const surveyStatistics = {
-    totalQuestions: stateTree.count(),
-    enabledQuestions: stateTree.count(q => q.isEnabled),
-    disabledQuestions: stateTree.count(q => !q.isEnabled),
-    completedQuestions: stateTree.count(q => q.isCompleted),
-    incompletedQuestions: stateTree.count(q => !q.isCompleted),
+    totalQuestions: stateTree?.count(),
+    enabledQuestions: stateTree?.count(q => q.isEnabled),
+    disabledQuestions: stateTree?.count(q => !q.isEnabled),
+    completedQuestions: stateTree?.count(q => q.isCompleted),
+    incompletedQuestions: stateTree?.count(q => !q.isCompleted),
   };
 
   useEffect(() => {
-    surveyStatistics.totalQuestions = stateTree.count()
-    surveyStatistics.enabledQuestions = stateTree.count(q => q.isEnabled)
-    surveyStatistics.disabledQuestions = stateTree.count(q => !q.isEnabled)
-    surveyStatistics.completedQuestions = stateTree.count(q => q.isCompleted)
-    surveyStatistics.incompletedQuestions = stateTree.count(q => !q.isCompleted)
-  }, [stateTree])
+    setStateTree(new Survey(initialQuestions));
+  }, []);
+
+  useEffect(() => {
+    if (stateTree) {
+      surveyStatistics.totalQuestions = stateTree.count()
+      surveyStatistics.enabledQuestions = stateTree.count(q => q.isEnabled)
+      surveyStatistics.disabledQuestions = stateTree.count(q => !q.isEnabled)
+      surveyStatistics.completedQuestions = stateTree.count(q => q.isCompleted)
+      surveyStatistics.incompletedQuestions = stateTree.count(q => !q.isCompleted)
+    }
+  }, [stateTree, surveyStatistics])
 
   const [selectedNode, setSelectedNode] = useState<Question | null>(() => {
     // Select the initial root node by default
     return initialQuestions.length > 0 ? initialQuestions[0] : null;
   });
 
-
   const [newNodeName, setNewNodeName] = useState(''); //State for new nodes name.
   const [newChildName, setNewChildName] = useState(''); //state for new child name.
   const [expandedNodes, setExpandedNodes] = useState<string[]>(() => {
-    // Initially expand only the root node
     return initialQuestions.length > 0 ? [initialQuestions[0].name] : [];
   });
-
-
 
   const [surveyName, setSurveyName] = useState('Default Survey');
   const [isEditingSurveyName, setIsEditingSurveyName] = useState(false);
@@ -76,7 +76,7 @@ export default function Home() {
   const updateNodeName = () => {
     if (selectedNode && newNodeName) {
       setStateTree(prevState => {
-        const newStateTree = new Survey(prevState.questions);
+        const newStateTree = new Survey(prevState?.questions || []);
         const nodeToUpdate = newStateTree.first(
           node => node === selectedNode
         );
@@ -92,7 +92,7 @@ export default function Home() {
   const addChildNode = () => {
     if (selectedNode && newChildName) {
       setStateTree(prevState => {
-        const newStateTree = new Survey(prevState.questions);
+        const newStateTree = new Survey(prevState?.questions || []);
         const nodeToUpdate = newStateTree.first(node => node === selectedNode);
         if (nodeToUpdate) {
           // Check if a child with the same name already exists
@@ -125,9 +125,8 @@ export default function Home() {
   const deleteNode = () => {
     if (selectedNode) {
       setStateTree(prevState => {
-        let newStateTree = new Survey(prevState.questions);
+        let newStateTree = new Survey(prevState?.questions || []);
 
-        // Function to recursively find and delete the node
         const deleteRecursive = (
           nodes: Question[],
           nodeToDelete: Question
@@ -160,8 +159,8 @@ export default function Home() {
   const toggleNodeEnable = () => {
     setStateTree((prevTree) => {
       if (selectedNode) {
-        const newTree = new Survey([], prevTree.name);
-        newTree.updateQuestions(prevTree.questions)
+        const newTree = new Survey([], prevTree?.name || '');
+        newTree.updateQuestions(prevTree?.questions || []);
         const nodeToUpdate = newTree.first((node) => node.name === selectedNode.name);
         if (nodeToUpdate) {
           newTree.toggle(nodeToUpdate)
@@ -177,8 +176,8 @@ export default function Home() {
   const toggleNodeComplete = () => {
     if (selectedNode) {
       setStateTree(prevState => {
-        const newStateTree = new Survey([], prevState.name);
-        newStateTree.updateQuestions(prevState.questions)
+        const newStateTree = new Survey([], prevState?.name || '');
+        newStateTree.updateQuestions(prevState?.questions || []);
         const nodeToUpdate = newStateTree.first(node => node.name === selectedNode.name);
         if (nodeToUpdate) {
           nodeToUpdate.isCompleted = !nodeToUpdate.isCompleted;
@@ -213,7 +212,7 @@ export default function Home() {
     if (expandedNodes.includes(node.name)) {
       toggleExpanded(node);
     }
-  }, [expandedNodes, setSelectedNode, handleNodeSelection]);
+  }, [expandedNodes, setSelectedNode]);
 
   const displayTree = (trees: Question[], indentLevel: number = 1) => {
     const indent = 1 * indentLevel; // Indent 1rem per level
@@ -239,12 +238,11 @@ export default function Home() {
   };
 
   const handleSetSurveyName = () => {
-    stateTree.setName(surveyName);
+    stateTree?.setName(surveyName);
     setIsEditingSurveyName(false);
   };
 
   const EnabledNodeList = ({ survey }: { survey: Survey }) => {
-    const version = survey.version
     const enabledNodes = survey.traverse(q => q.isEnabled)
     return (
       <div
@@ -252,8 +250,10 @@ export default function Home() {
         <h3 className="font-semibold mb-2">Enabled Nodes</h3>
         <ul>
           {enabledNodes.map((node: Question, index: number) =>
-            <li key={index} style={{ color: node.isCompleted ? 'green' : 'black' }}>{node.name}</li>)}</ul></div>);
+            <li key={index} style={{ color: node.isCompleted ? 'green' : 'black', fontWeight: 'bold'}}>{node.name}</li>)}</ul></div>);
   };
+
+  if (!stateTree) return null; // or a loading spinner
 
   return (
     <SidebarProvider>
